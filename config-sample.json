@@ -1,20 +1,20 @@
 {
-    "bridge": {
-        "name": "Homebridge",
-        "username": "CD:22:3D:E3:CE:30",
-        "port": 51826,
-        "pin": "031-45-156"
-    },
-    
-    "description": "The Onion!",
+	"bridge": {
+		"name": "Homebridge",
+		"username": "CD:22:3D:E3:CE:30",
+		"port": 51826,
+		"pin": "031-45-156"
+	},
+
+	"description": "The Onion!",
 
 	"platforms": [],
 
-    "accessories": [
+	"accessories": [
 		{
-            "accessory": "RM mini3",
-            "name": "Broadlink RM mini3",
-            "host": "192.168.10.8",
+			"accessory": "RM mini3",
+			"name": "Broadlink RM mini3",
+			"host": "192.168.10.8",
 			"data": [
 				{
 					"type": "on",
@@ -35,5 +35,5 @@
 				}
 			]
 		}
-    ]
+	]
 }

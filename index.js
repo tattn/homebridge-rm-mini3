@@ -6,61 +6,61 @@ var sender = require('./sender');
 
 
 module.exports = function (homebridge) {
-	Service = homebridge.hap.Service;
-	Characteristic = homebridge.hap.Characteristic;
+  Service = homebridge.hap.Service;
+  Characteristic = homebridge.hap.Characteristic;
   HomeKitTVTypes = HKTTGen(homebridge);
-  
-	homebridge.registerAccessory("homebridge-rm-mini3", "RM mini3", RMMini3Accessory);
+
+  homebridge.registerAccessory("homebridge-rm-mini3", "RM mini3", RMMini3Accessory);
 }
 
 function RMMini3Accessory(log, config) {
   this.log = log;
 
-	this.host = config["host"];
-	this.name = config["name"];
+  this.host = config["host"];
+  this.name = config["name"];
   this.data = config["data"];
 }
 
 RMMini3Accessory.prototype = {
 
-	setPowerState: function (payloadPowerOn, payloadPowerOff, powerOn, callback) {
+  setPowerState: function (payloadPowerOn, payloadPowerOff, powerOn, callback) {
 
-		if (powerOn) {
+    if (powerOn) {
       sender(this.host, payloadPowerOn, function (err) {
         callback();
         // callback('error');
       });
-		} else {
+    } else {
       sender(this.host, payloadPowerOff, function (err) {
         callback();
         // callback('error');
       });
-		}
-	},
+    }
+  },
 
-	setChannel: function (payloadChannels, channel, callback) {
+  setChannel: function (payloadChannels, channel, callback) {
 
     this.log("ch: " + channel);
     sender(this.host, payloadChannels[channel], function (err) {
       callback();
     });
-	},
+  },
 
-	identify: function (callback) {
-		this.log("Identify requested!");
-		callback(); // success
-	},
+  identify: function (callback) {
+    this.log("Identify requested!");
+    callback(); // success
+  },
 
-	getServices: function () {
+  getServices: function () {
 
     var services = [];
 
-		var informationService = new Service.AccessoryInformation();
+    var informationService = new Service.AccessoryInformation();
 
-		informationService
-			.setCharacteristic(Characteristic.Manufacturer, "Broadlink")
-			.setCharacteristic(Characteristic.Model, "RM mini3")
-			.setCharacteristic(Characteristic.SerialNumber, this.data["host"]);
+    informationService
+      .setCharacteristic(Characteristic.Manufacturer, "Broadlink")
+      .setCharacteristic(Characteristic.Model, "RM mini3")
+      .setCharacteristic(Characteristic.SerialNumber, this.data["host"]);
     services.push(informationService);
 
 
@@ -89,7 +89,7 @@ RMMini3Accessory.prototype = {
       }
     }
 
-		return services;
-	}
+    return services;
+  }
 };
 
