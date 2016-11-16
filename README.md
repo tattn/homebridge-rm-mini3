@@ -8,3 +8,6 @@ This allows you to control your RM mini3 with HomeKit and Siri.
 1. Install homebridge using: `sudo npm install -g homebridge`
 2. Install this plugin using: `npm install -g homebridge-rm-mini3`
 3. Update your configuration file. See config-sample.json.
+
+(for Japanese)
+[Qiita](http://qiita.com/tattn/items/dc022890b686b6fd2a99)
