@@ -1,6 +1,6 @@
 {
   "name": "homebridge-rm-mini3",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "broadlink rm mini 3 plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
