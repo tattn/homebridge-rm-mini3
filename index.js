@@ -55,7 +55,7 @@ RMMini3Accessory.prototype = {
     callback(null, Characteristic.TargetHeatingCoolingState.AUTO); // success
 	},
 	getTargetHeatingCoolingState: function(callback) {
-		this.log("getTargetHeatingCoolingState (always 'auto')";
+		this.log("getTargetHeatingCoolingState (always 'auto')");
     
 		callback(null, Characteristic.TargetHeatingCoolingState.AUTO); // success
 	},
