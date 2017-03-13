@@ -70,7 +70,7 @@ RMMini3Accessory.prototype = {
 
       if (type == "on") {
         this.log("add switch service");
-        var switchService = new Service.Switch(this.name);
+        var switchService = new Service.Switch(data.name || this.name);
         switchService
           .getCharacteristic(Characteristic.On)
           .on('set', this.setPowerState.bind(this, data["on"], data["off"]));
@@ -81,7 +81,7 @@ RMMini3Accessory.prototype = {
         for (var i = 1; i <= 9; i++) {
           channels.push(data[i + ""]);
         }
-        var channelService = new HomeKitTVTypes.ChannelService(this.name);
+        var channelService = new HomeKitTVTypes.ChannelService(data.name || this.name);
         channelService
           .getCharacteristic(HomeKitTVTypes.ChannelState)
           .on('set', this.setChannel.bind(this, channels));
