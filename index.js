@@ -19,8 +19,9 @@ function RMMini3Accessory(log, config) {
   this.host = config["host"];
   this.name = config["name"];
   this.data = config["data"];
-  
-  this.targetTemperature = 0
+
+  this.thermostatOn = false
+  this.targetTemperature = 1
   this.temperatureDisplayUnits = Characteristic.TemperatureDisplayUnits.CELSIUS;
 }
 
@@ -48,34 +49,67 @@ RMMini3Accessory.prototype = {
       callback();
     });
   },
-  
+
+  sendTemperature: (temperature, host, data) => {
+
+    if (temperature > 21) {
+
+      sender(host, data.heat, () => {})
+    } else {
+      sender(host, data.cool, () => {})
+    }
+  },
+
   // Required
 	getCurrentHeatingCoolingState: function(callback) {
 		this.log("getCurrentHeatingCoolingState (always 'auto')");
-    callback(null, Characteristic.TargetHeatingCoolingState.AUTO); // success
+
+    const heatingCoolingState = this.thermostatOn ? Characteristic.CurrentHeatingCoolingState.AUTO : Characteristic.CurrentHeatingCoolingState.OFF
+    callback(null, heatingCoolingState); // success
 	},
 	getTargetHeatingCoolingState: function(callback) {
 		this.log("getTargetHeatingCoolingState (always 'auto')");
-    
-		callback(null, Characteristic.TargetHeatingCoolingState.AUTO); // success
+
+    const heatingCoolingState = this.thermostatOn ? Characteristic.TargetHeatingCoolingState.AUTO : Characteristic.TargetHeatingCoolingState.OFF
+
+		callback(null, heatingCoolingState); // success
 	},
-	setTargetHeatingCoolingState: function(value, callback) {
-		this.log("setTargetHeatingCoolingState (do nothing");
+	setTargetHeatingCoolingState: function(data, value, callback) {
+    if (value === undefined) return callback(); //Some stuff call this without value doing shit with the rest
+
+    const heatingCoolingState = this.thermostatOn ? Characteristic.CurrentHeatingCoolingState.AUTO : Characteristic.CurrentHeatingCoolingState.OFF
+
+    if (value === Characteristic.TargetHeatingCoolingState.OFF) {
+      this.thermostatOn = false
+  		this.log("setTargetHeatingCoolingState (turn off)");
+
+      sender(this.host, data.off, () => {})
+    } else {
+      this.thermostatOn = true
+  		this.log("setTargetHeatingCoolingState (turn on; 'auto')");
+
+      this.sendTemperature(this.targetTemperature, this.host, data)
+    }
+
     callback(null);
 	},
 	getCurrentTemperature: function(callback) {
 		this.log("getCurrentTemperature (" + this.targetTemperature +")");
-		
+
 		callback(null, this.currentTemperature); // success
 	},
 	getTargetTemperature: function(callback) {
 		this.log("getTargetTemperature (" + this.targetTemperature +")");
 		callback(null, this.targetTemperature)
 	},
-	setTargetTemperature: function(value, callback) {
-		this.log("setTargetTemperature (" + this.targetTemperature +")");
+	setTargetTemperature: function(data, value, callback) {
+		this.log("setTargetTemperature (" + value +")");
     this.targetTemperature = value
-		callback(null)
+
+    this.thermostatOn = true
+    this.sendTemperature(this.targetTemperature, this.host, data)
+
+    callback(null)
 	},
 	getTemperatureDisplayUnits: function(callback) {
 		this.log("getTemperatureDisplayUnits:", this.temperatureDisplayUnits);
@@ -86,6 +120,11 @@ RMMini3Accessory.prototype = {
 		this.log("setTemperatureDisplayUnits from %s to %s", this.temperatureDisplayUnits, value);
 		this.temperatureDisplayUnits = value;
 		callback(null);
+	},
+  getName: function(name, callback) {
+		this.log("getName :", name);
+
+		callback(null, name);
 	},
 
   identify: function (callback) {
@@ -120,7 +159,7 @@ RMMini3Accessory.prototype = {
       } else if (type == "thermostat") {
         this.log("add thermostat service");
         var thermostatService = new Service.Thermostat(data.name || this.name);
-        
+
        	// Required Characteristics
         thermostatService
           .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -129,7 +168,7 @@ RMMini3Accessory.prototype = {
         thermostatService
           .getCharacteristic(Characteristic.TargetHeatingCoolingState)
           .on('get', this.getTargetHeatingCoolingState.bind(this))
-          .on('set', this.setTargetHeatingCoolingState.bind(this));
+          .on('set', this.setTargetHeatingCoolingState.bind(this, data));
 
         thermostatService
           .getCharacteristic(Characteristic.CurrentTemperature)
@@ -138,12 +177,30 @@ RMMini3Accessory.prototype = {
         thermostatService
           .getCharacteristic(Characteristic.TargetTemperature)
           .on('get', this.getTargetTemperature.bind(this))
-          .on('set', this.setTargetTemperature.bind(this));
+          .on('set', this.setTargetTemperature.bind(this, data));
 
         thermostatService
           .getCharacteristic(Characteristic.TemperatureDisplayUnits)
           .on('get', this.getTemperatureDisplayUnits.bind(this))
-          .on('set', this.setTemperatureDisplayUnits.bind(this)); 
+          .on('set', this.setTemperatureDisplayUnits.bind(this));
+
+        thermostatService
+          .getCharacteristic(Characteristic.Name)
+          .on('get', this.getName.bind(this, data.name || this.name));
+        thermostatService
+          .getCharacteristic(Characteristic.CurrentTemperature)
+          .setProps({
+            minValue: 0,
+            maxValue: 30,
+            minStep: 1
+          });
+        thermostatService
+          .getCharacteristic(Characteristic.TargetTemperature)
+          .setProps({
+            minValue: 0,
+            maxValue: 30,
+            minStep: 1
+          });
 
         services.push(thermostatService);
       } else if (type == "channel") {
@@ -163,4 +220,3 @@ RMMini3Accessory.prototype = {
     return services;
   }
 };
-
